@@ -81,6 +81,27 @@ async function handleAddToCart() {
   }
 }
 
+async function handleBuyNow() {
+  if (!product.value || !requireAuth()) {
+    return
+  }
+
+  actionLoading.value = true
+  actionError.value = ''
+
+  try {
+    await addToCart({
+      product_id: product.value.id,
+      quantity: quantity.value,
+    })
+
+    router.push('/checkout')
+  } catch (err) {
+    actionError.value = getErrorMessage(err, 'Unable to process your request.')
+    actionLoading.value = false
+  }
+}
+
 async function handleAddWishlist() {
   if (!product.value || !requireAuth()) {
     return
@@ -176,7 +197,10 @@ watch(productId, loadProduct, { immediate: true })
               <input id="quantity" v-model.number="quantity" class="input" type="number" min="1" max="99" />
             </div>
             <div class="actions">
-              <button class="button button--primary" type="button" :disabled="actionLoading" @click="handleAddToCart">
+              <button class="button button--primary" type="button" :disabled="actionLoading" @click="handleBuyNow">
+                {{ actionLoading ? 'Working...' : 'Buy Now' }}
+              </button>
+              <button class="button button--ghost" type="button" :disabled="actionLoading" @click="handleAddToCart">
                 {{ actionLoading ? 'Working...' : 'Add to cart' }}
               </button>
               <button class="button button--ghost" type="button" :disabled="actionLoading" @click="handleAddWishlist">
